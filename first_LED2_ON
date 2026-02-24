@@ -1,0 +1,26 @@
+int main(void)
+{
+	//RCC_GPIOA Enable
+	*((unsigned int*)0x4002102C) = (unsigned int)0x01; //PortA Enabling
+	
+	//GPIO A - PA5 - mode : OUTPUT
+	//MODE init Value = 0xEBFFFCFF
+	*((unsigned int*)0x50000000U) = 0xEBFFF4FF;
+	
+	//OTYPER
+	*((unsigned int*)(0x50000000U+0x00000004U)) = 0;
+	
+	//OSPEEDR init Value = 0x0C000000
+	*((unsigned int*)(0x50000000U+0x00000008U)) = (unsigned int)0x0C000C00;
+	
+	//OPUPDR init Value = 0x24000000
+	*((unsigned int*)(0x50000000U+0x0000000CU)) = (unsigned int)0x24000000;
+	
+	//ODR
+	*((unsigned int*)(0x50000000U+0x00000014U)) = (unsigned int)0x20;
+
+	while(1)
+	{
+    ;
+	}
+}
