@@ -17,10 +17,25 @@ int main(void)
 	*((unsigned int*)(0x50000000U+0x0000000CU)) = (unsigned int)0x24000000;
 	
 	//ODR
-	*((unsigned int*)(0x50000000U+0x00000014U)) = (unsigned int)0x20;
-
+	*((unsigned int*)(0x50000000U+0x00000014U)) = (unsigned int)0x00;
+	
+	volatile int counter = 0;
 	while(1)
 	{
-    ;
+		//ODR
+	*((unsigned int*)(0x50000000U+0x00000014U)) = (unsigned int)0x20;
+		
+		counter = 0;
+		while(counter< 200000) //delay loop
+		{
+			counter++;
+		}
+		*((unsigned int*)(0x50000000U+0x00000014U)) = (unsigned int)0x00;
+		
+		counter = 0;
+		while(counter< 200000) //delay loop
+		{
+			counter++;
+		}
 	}
 }
