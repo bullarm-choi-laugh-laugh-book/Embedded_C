@@ -19,23 +19,28 @@ int main(void)
 	//ODR
 	*((unsigned int*)(0x50000000U+0x00000014U)) = (unsigned int)0x00;
 	
-	volatile int counter = 0;
+	
+	
+	void Delay(unsigned int delaytime); //why unsigned?
+	
+	
 	while(1)
 	{
 		//ODR
-	*((unsigned int*)(0x50000000U+0x00000014U)) = (unsigned int)0x20;
+		*((unsigned int*)(0x50000000U+0x00000014U)) = (unsigned int)0x20;
 		
-		counter = 0;
-		while(counter< 200000) //delay loop
-		{
-			counter++;
-		}
+		Delay(0x100000);
+		
 		*((unsigned int*)(0x50000000U+0x00000014U)) = (unsigned int)0x00;
 		
-		counter = 0;
-		while(counter< 200000) //delay loop
+		Delay(0x100000);
+	}
+}
+
+void Delay(unsigned int delaytime){
+	volatile int counter = 0;
+	while(counter< delaytime) //delay loop
 		{
 			counter++;
 		}
 	}
-}
