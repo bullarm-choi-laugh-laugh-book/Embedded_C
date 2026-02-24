@@ -12,57 +12,116 @@
 #define GPIO_PA5PIN_IDR (*((volatile unsigned int *)(GPIO_PA5PIN_BASE + 0x00000010UL)))
 #define GPIO_PA5PIN_ODR (*((volatile unsigned int *)(GPIO_PA5PIN_BASE + 0x00000014UL)))
 
+#define GPIO_2BIT_POS_MASK ((unsigned int)0x00000003U) // 0011
+#define GPIO_1BIT_POS_MASK ((unsigned int)0x00000001U) // 0001
+
+#define GPIO_PIN_5_POS 5
+#define GPIO_PIN_8_POS 8
+
 int main(void)
 {
+    unsigned int position = GPIO_PIN_5_POS; // Pin position PA5
+    unsigned int temp = 0x0U;
+    unsigned int reg_val = 0x0U;
+    unsigned int reg = 0x0U;
+
     // RCC_GPIOA Enable
     //*((unsigned int *)0x4002102C) = (unsigned int)0x01; // PortA Enabling
-    RCC_GPIOA = (unsigned int)0x01;                     // PortA Enabling
+    reg = RCC_GPIOA;                         // reg =REGISTER
+    RCC_GPIOA = (unsigned int)(reg | 0x01U); // PortA Enabling
 
     // GPIO A - PA5 - mode : OUTPUT
     // MODE init Value = 0xEBFFFCFF
     // *((unsigned int *)0x50000000U) = 0xEBFFF4FF;
-    GPIO_PA5PIN_MODE = 0xEBFFF4FF;
+    reg = GPIO_PA5PIN_MODE;
+    temp = ~(GPIO_2BIT_POS_MASK << (position * 2U)); // 0xFFFF.F3FF
+    reg &= temp;
+
+    // GRP MODE : 01
+    reg_val = 0x01U << (position * 2U); // GPIO Output Mode - 2bit 0x00000400
+    reg |= reg_val;
+    // GPIO_PA5PIN_MODE = 0xEBFFF4FF;
+    GPIO_PA5PIN_MODE = reg;
 
     // OTYPER
     //*((unsigned int *)(0x50000000U + 0x00000004U)) = 0;
-    GPIO_PA5PIN_OTYPE = 0;
+    // GPIO_PA5PIN_OTYPE = 0;
+
+    reg = GPIO_PA5PIN_OTYPE;
+    temp = ~(GPIO_1BIT_POS_MASK << (position)); //~0x20 ==> 0xFFFFFFDF
+    reg &= temp;
+
+    reg_val = 0x0U << (position); // Output type- 1bit
+    reg |= reg_val;
+    GPIO_PA5PIN_OTYPE = reg;
 
     // OSPEEDR init Value = 0x0C000000
     //*((unsigned int *)(0x50000000U + 0x00000008U)) = (unsigned int)0x0C000C00;
-    GPIO_PA5PIN_OSPEEDR = (unsigned int)0x0C000C00;
+    // GPIO_PA5PIN_OSPEEDR = (unsigned int)0x0C000C00;
+    reg = GPIO_PA5PIN_OSPEEDR;
+    temp = ~(GPIO_2BIT_POS_MASK << (position * 2U)); // 0xFFFFF3FF
+    reg &= temp;
+
+    reg_val = 0x03U << (position * 2U); // Very High speed -2bit 0x00000C00
+    reg |= reg_val;
+    GPIO_PA5PIN_OSPEEDR = reg;
 
     // OPUPDR init Value = 0x24000000
     //*((unsigned int *)(0x50000000U + 0x0000000CU)) = (unsigned int)0x24000000;
-    GPIO_PA5PIN_OPUPDR = (unsigned int)0x24000000;
+    // GPIO_PA5PIN_OPUPDR = (unsigned int)0x24000000;
+    reg = GPIO_PA5PIN_OPUPDR;
+    temp = ~(GPIO_2BIT_POS_MASK << (position * 2U)); // 0xFFFFF3FF
+    reg &= temp;
+
+    reg_val = 0x0U << (position * 2U); // Very High speed -2bit 0x00000C00
+    reg |= reg_val;
+    GPIO_PA5PIN_OPUPDR = reg;
 
     // ODR
     //*((unsigned int *)(0x50000000U + 0x00000014U)) = (unsigned int)0x00;
+    // GPIO_PA5PIN_ODR = (unsigned int)0x00;
+    reg = GPIO_PA5PIN_ODR;
+    //~0x20 ==> 0xFFFFFFDF
+    temp = ~(GPIO_1BIT_POS_MASK << (position)); // 0xFFFFF3FF
+    reg &= temp;
 
-    GPIO_PA5PIN_ODR = (unsigned int)0x00;
+    reg_val = 0x01U << (position); // Very High speed -2bit 0x00000C00
+    reg |= reg_val;
+    GPIO_PA5PIN_ODR = reg;
 
     void Delay(unsigned int delaytime); // why unsigned?
 
     while (1)
     {
+        
+        // ODR : LED OFF Value
+    //*((unsigned int *)(0x50000000U + 0x00000014U)) = (unsigned int)0x20;
+    //GPIO_PA5PIN_ODR = (unsigned int)0x20 <=> 0x00;
+            reg_val = ~(reg_val&(GPIO_1BIT_POS_MASK << position));
+            GPIO_PA5PIN_ODR = reg|reg_val;
+				Delay(0x1000);
+        
         // ODR
-        //*((unsigned int *)(0x50000000U + 0x00000014U)) = (unsigned int)0x20;
+			/*
+        *((unsigned int *)(0x50000000U + 0x00000014U)) = (unsigned int)0x20;
         GPIO_PA5PIN_ODR = (unsigned int)0x20;
 
-        Delay(0x100000);
+        Delay(0x3000);
 
-        //*((unsigned int *)(0x50000000U + 0x00000014U)) = (unsigned int)0x00;
+        *((unsigned int *)(0x50000000U + 0x00000014U)) = (unsigned int)0x00;
         GPIO_PA5PIN_ODR = (unsigned int)0x00;
 
-        Delay(0x100000);
+        Delay(0x3000);
+			*/
     }
 }
 
 void Delay(unsigned int delaytime)
 {
-	volatile int count = 0;
-	
-	while(count < delaytime)
-	{
-		count++;
-	}
+    volatile int count = 0;
+
+    while (count < delaytime)
+    {
+        count++;
+    }
 }
