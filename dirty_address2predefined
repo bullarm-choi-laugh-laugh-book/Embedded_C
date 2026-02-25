@@ -1,0 +1,72 @@
+//Define everything haha
+//address over 8letter = 8*4 >= 32! needed L
+
+////////////////////////////////////////////RCC////////////////////////////////////////////////////////////////
+#define PERIPH_BASE 0x40000000UL //L is for Long(over 32bit) U is for unsigned
+#define AHB_PERIPH_BASE (PERIPH_BASE + 0x00020000UL) //AHB starts from 0x4000.0" -> 0x4002.0"
+#define RCC_BASE		(AHB_PERIPH_BASE+0x00001000UL) 		// RCC starts from 4002 1000
+
+//( + ) = address value, (v int*)() = define v int type pointer, *(big) = set value of (big) address. were gonna change it lol
+#define RCC_GPIOA		*((volatile unsigned int*)(RCC_BASE+ 0x0000002CUL)) //GPIOA is RCC + 0x2C offset
+/////////////////////////////////////////////RCC/////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////GPIO_R/////////////////////////////////////////////////////////////////////////////
+
+//this is base (+ offset address)
+#define GPIO_PortA_PIN_BASE (unsigned int)0x50000000U
+	
+//why (*~)? cause were gonna change its value(bit)
+#define GPIO_PortA_PIN_MODE (*((volatile unsigned int*)GPIO_PortA_PIN_BASE))
+#define GPIO_PortA_PIN_OTYPE (*((volatile unsigned int*)(GPIO_PortA_PIN_BASE + 0x00000004UL)))
+#define GPIO_PortA_PIN_OSPEEDR (*((volatile unsigned int*)(GPIO_PortA_PIN_BASE + 0x00000008UL)))
+#define GPIO_PortA_PIN_OPUPDR (*((volatile unsigned int*)(GPIO_PortA_PIN_BASE + 0x0000000CUL)))
+#define GPIO_PortA_PIN_IDR (*((volatile unsigned int*)(GPIO_PortA_PIN_BASE + 0x00000010UL)))
+#define GPIO_PortA_PIN_ODR (*((volatile unsigned int*)(GPIO_PortA_PIN_BASE + 0x00000014UL)))
+/////////////////////////////////////////////GPIO_R/////////////////////////////////////////////////////////////////////////////
+
+void Delay(unsigned int waittime);
+
+int main(void)
+{
+	//RCC_GPIOA Enable
+	//*((unsigned int*)0x4002102C) = (unsigned int)0x01; //PortA Enabling
+	RCC_GPIOA = (unsigned int)0x01;
+	
+	//GPIO A - PA5 - mode : OUTPUT
+	//MODE init Value = 0xEBFFF'C'FF, GPIO = 01, C = '11'00 -> '01'00 = 3  
+	//*((unsigned int*)0x50000000U) = 0xEBFDFCFF;
+	GPIO_PortA_PIN_MODE = 0xEBFFF4FF;
+	
+	//OTYPER 0 = push pull, 1 = open drain, 1bit. 0 - 0 
+	//*((unsigned int*)(0x50000000U+0x00000004U)) = 0;
+	GPIO_PortA_PIN_OTYPE = 0x00U;
+	
+	//OSPEEDR init Value = 0x0C000000
+	//*((unsigned int*)(0x50000000U+0x00000008U)) = (unsigned int)0x0C030000;
+	// 0C00.0000, 0x0 = 0000 -> 1100 = C, 11 for high speed
+	GPIO_PortA_PIN_OSPEEDR = (unsigned int)0x0C000C00;
+	
+	//OPUPDR init Value = 0x24000000
+	//*((unsigned int*)(0x50000000U+0x0000000CU)) = (unsigned int)0x24000000; as a default
+	//no pull up-down is 00 so no change
+	GPIO_PortA_PIN_OPUPDR = (unsigned int)0x24000000; 
+	
+	//ODR
+	//*((unsigned int*)(0x50000000U+0x00000014U)) = (unsigned int)0x00000000;
+	//just change bit u wanna change its value. 
+	GPIO_PortA_PIN_ODR = 0x20U;
+	
+	
+	while(1)
+	{
+    ;
+	}
+}
+
+void Delay(unsigned int waittime){
+	volatile int count = 0;
+	
+	while(count < waittime){
+		count++;
+	}
+}
